@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import bcrypt from 'bcryptjs';
 // schema
 const userSchema= new mongoose.Schema(
     {
@@ -20,7 +21,8 @@ const userSchema= new mongoose.Schema(
         password:
         {
             type: String,
-            require: [true,"Password is required"]
+            require: [true,"Password is required"],
+            minlength: [6,"Password length should be greater than 6 character"]
         },
         location:{
             type: String,
@@ -30,5 +32,13 @@ const userSchema= new mongoose.Schema(
     },{timestamps:true}
 )
 
+// Middleware 
+userSchema.pre('save',async function()
+{
+    const salt= await bcrypt.genSalt(10); 
+    this.password= await bcrypt.hash(this.password,salt);
+})
 
+
+// Export
 export default mongoose.model("User",userSchema);
